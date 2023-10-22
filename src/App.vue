@@ -7,11 +7,19 @@
     </div>
     <div id="course-container" :class="color" v-else>
       <div class="toc title" ><div contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
-      <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ (index + 1) >9?(index + 1):'0' + (index + 1) }}</span><span contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
+      <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
       <div class="toc more">......<br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-line"></span><span class="right-line"></span></div>
     </div>
     <div>
       <div v-if="!image">
+        <a-row>
+          <a-col :span="12">
+            <a-button class="footer-center"  @click="addItem">+</a-button>
+          </a-col>
+          <a-col :span="12">
+            <a-button class="footer-center"  @click="removeItem(items.length - 1)" >-</a-button>
+          </a-col>
+        </a-row>
         <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑</p>
         <div class="footer-center">
           <a-radio-group style="width: 100%;" v-model:value="color">
@@ -22,8 +30,11 @@
             <a-radio-button style="background-color: #fff1b8;" value="golden">&nbsp;金&nbsp;</a-radio-button>
           </a-radio-group>
         </div>
-        <a-button class="footer-center"  @click="addItem">+</a-button>
-        <a-button class="footer-center"  @click="removeItem(items.length - 1)" >-</a-button>
+        <a-row>
+          <a-col :span="24" style="text-align: center;">
+            <a-checkbox  v-model:checked="startNumberZero" >序号从0开始</a-checkbox>
+          </a-col>
+        </a-row>
         <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
       </div>
       <a-button class="footer-center" v-else  @click="()=> image = ''">返回编辑</a-button>
@@ -55,7 +66,8 @@ export default {
         { text: 'Mac 诞生了：你说你想要一场革命' }
       ],  // 目录项列表
       image: '',  // 生成的图像
-      color: 'pink'
+      color: 'pink',
+      startNumberZero: false
     };
   },
   methods: {
@@ -70,6 +82,10 @@ export default {
     },
     removeItem(index) {
       this.items.splice(index, 1);
+    },
+    startNumber(index){
+      const nIndex = this.startNumberZero?index:index + 1
+      return nIndex >9?nIndex:'0' + nIndex
     },
     shareImage() {
       // 分享图像的逻辑，略
