@@ -3,26 +3,29 @@
     <div v-if="image" style="width: 100%; height: 100%;">
       <!-- 生成的图像 -->
       <img  :src="image" style="width: 100%;" />
-      <p style="text-align: center;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
+      <p style="text-align: center;background-color: #e1d0d042;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
     </div>
     <div id="course-container" :class="color" v-else>
-      <div class="toc title" ><div contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
-      <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
+      <div class="toc title" ><div  contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
+      <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
       <div class="toc more">......<br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-line"></span><span class="right-line"></span></div>
     </div>
-    <div>
+    <div id="options">
       <div v-if="!image">
         <a-row>
-          <a-col :span="12">
-            <a-button class="footer-center"  @click="addItem">+</a-button>
+          <a-col :span="8">
+            <a-button class="footer-center"  @click="clearItem()" >清空内容</a-button>
           </a-col>
-          <a-col :span="12">
+          <a-col :span="8">
             <a-button class="footer-center"  @click="removeItem(items.length - 1)" >-</a-button>
           </a-col>
+          <a-col :span="8">
+            <a-button class="footer-center"  @click="addItem">+</a-button>
+          </a-col>
         </a-row>
-        <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑</p>
+        <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑<br>所有内容、选项保存至本地</p>
         <div class="footer-center">
-          <a-radio-group style="width: 100%;" v-model:value="color">
+          <a-radio-group style="width: 100%;" v-model:value="color" @change="saveData">
             <a-radio-button style="background-color: #f5e5eb;" value="pink">&nbsp;粉&nbsp;</a-radio-button>
             <a-radio-button style="background-color: #d9f7be;" value="green">&nbsp;绿&nbsp;</a-radio-button>
             <a-radio-button style="background-color: #e6f4ff;" value="bule">&nbsp;蓝&nbsp;</a-radio-button>
@@ -32,22 +35,24 @@
         </div>
         <a-row>
           <a-col :span="24" style="text-align: center;">
-            <a-checkbox  v-model:checked="startNumberZero" >序号从0开始</a-checkbox>
+            <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号从0开始</a-checkbox>
           </a-col>
         </a-row>
         <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
       </div>
       <a-button class="footer-center" v-else  @click="()=> image = ''">返回编辑</a-button>
     </div>
-  <div style="margin-top: 40px;"></div>
   <div class="footer">
-    <p>© 2023｜<a href="https://struy.cn/">StruggleYang</a></p>
+    <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a></p>
   </div>
   </div>
 </template>
 
 <script>
 import html2canvas from 'html2canvas';
+
+const localDataKey = "localMasterData"
+
 export default {
   data() {
     return {
@@ -70,29 +75,65 @@ export default {
       startNumberZero: false
     };
   },
+  created() {
+    this.initData()
+  },
   methods: {
     setValue(field, val) {
       this[field] = val;
+      this.saveData()
     },
     setValue2(obj,field, val) {
       obj[field] = val;
+      this.saveData()
     },
     addItem() {
       this.items.push({ text: '' });
+      this.saveData()
     },
     removeItem(index) {
       this.items.splice(index, 1);
+      this.saveData()
+    },
+    clearItem() {
+      this.courseTitle = '标题'
+      this.courseMore = 'more'
+      this.items.forEach(x => x.text = '')
+      document.querySelector('.input-span').focus()
+      this.saveData()
     },
     startNumber(index){
       const nIndex = this.startNumberZero?index:index + 1
       return nIndex >9?nIndex:'0' + nIndex
     },
+    initData(){
+      const dataStr = localStorage.getItem(localDataKey)
+      if(dataStr){
+        const data = JSON.parse(dataStr)
+        this.courseTitle = data.courseTitle
+        this.courseMore = data.courseMore
+        this.items = data.items
+        this.color = data.color
+        this.startNumberZero = data.startNumberZero
+      }
+    },
+    saveData(){
+      const data = {
+        courseTitle: this.courseTitle,
+        courseMore: this.courseMore,
+        items:this.items,
+        color:this.color,
+        startNumberZero:this.startNumberZero
+      }
+      const dataStr = JSON.stringify(data)
+      localStorage.setItem(localDataKey,dataStr)
+    },
     shareImage() {
-      // 分享图像的逻辑，略
       html2canvas(document.querySelector('#course-container'),{scale:3,dpi:350}).then(canvas => {
         const image = canvas.toDataURL('image/png');
         // You can now save the image or share it as you like
         this.image = image
+        this.saveData()
       });
     }
   }
@@ -256,11 +297,16 @@ export default {
 }
 .footer{
   text-align: center;
-  margin-bottom: 20px;
+  padding-top: 20px;
+  padding-bottom: 60px;
+  background-color: #e1d0d042;
 }
 .footer-center{
   width: 90%;
   margin: 5px 5%;
   text-align: center;
+}
+#options{
+  background-color: #e1d0d042;
 }
 </style>
