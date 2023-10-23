@@ -260,73 +260,55 @@ export default {
   background-color: #f1c475;
   color: #664815;
 }
-
-.more>span.left-line{
+span.left-line{
    position: absolute;
     height: 40%;
     border: 2px solid;
     border-radius: 2px;
     left: 8px;
-    bottom: 85%;
+    color: #ffffff;
 }
-.more>span.right-line{
+span.right-line{
    position: absolute;
     height: 40%;
     border: 2px solid;
     border-radius: 2px;
     right: 8px;
-    bottom: 85%;
+    color: #ffffff;
 }
 
-.more>span.left-bg{
+span.left-bg{
    position: absolute;
    padding: 4px;
    background-color: #524e4f;
     border-radius: 50%;
     left: 6px;
-    bottom: 83%;
 }
-.more>span.right-bg{
+span.right-bg{
    position: absolute;
    padding: 4px;
    background-color: #524e4f;
     border-radius: 50%;
     right: 6px;
-    bottom: 83%;
 }
 
-.title>span.left-line{
-   position: absolute;
-    height: 40%;
-    border: 2px solid;
-    border-radius: 2px;
-    left: 8px;
-    top: 85%;
-}
+.title>span.left-line,
 .title>span.right-line{
-   position: absolute;
-    height: 40%;
-    border: 2px solid;
-    border-radius: 2px;
-    right: 8px;
     top: 85%;
 }
 
-.title>span.left-bg{
-   position: absolute;
-   padding: 4px;
-   background-color: #524e4f;
-    border-radius: 50%;
-    left: 6px;
+.title>span.left-bg,
+.title>span.right-bg{
     top: 83%;
 }
-.title>span.right-bg{
-   position: absolute;
-   padding: 4px;
-   background-color: #524e4f;
-    border-radius: 50%;
-    right: 6px;
-    top: 83%;
+.more>span.left-line,
+.more>span.right-line{
+    bottom: 85%;
+}
+
+.more>span.left-bg,
+.more>span.right-bg{
+    bottom: 83%;
 }
 .footer{
   text-align: center;
