@@ -8,7 +8,7 @@
     <div id="course-container" :class="color" v-else>
       <div class="toc title" ><div  contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
       <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
-      <div class="toc more">......<br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-line"></span><span class="right-line"></span></div>
+      <div class="toc more">......<br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
     </div>
     <div id="options">
       <div v-if="!image">
@@ -261,6 +261,39 @@ export default {
   color: #664815;
 }
 
+.more>span.left-line{
+   position: absolute;
+    height: 40%;
+    border: 2px solid;
+    border-radius: 2px;
+    left: 8px;
+    bottom: 85%;
+}
+.more>span.right-line{
+   position: absolute;
+    height: 40%;
+    border: 2px solid;
+    border-radius: 2px;
+    right: 8px;
+    bottom: 85%;
+}
+
+.more>span.left-bg{
+   position: absolute;
+   padding: 4px;
+   background-color: #524e4f;
+    border-radius: 50%;
+    left: 6px;
+    bottom: 83%;
+}
+.more>span.right-bg{
+   position: absolute;
+   padding: 4px;
+   background-color: #524e4f;
+    border-radius: 50%;
+    right: 6px;
+    bottom: 83%;
+}
 
 .title>span.left-line{
    position: absolute;
