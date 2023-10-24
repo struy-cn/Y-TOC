@@ -13,13 +13,23 @@
     <div id="options">
       <div v-if="!image">
         <a-row>
-          <a-col :span="8">
-            <a-button class="footer-center"  @click="clearItem()" >清空内容</a-button>
+          <a-col :span="6">
+            <a-popconfirm
+              title="确认清空填写的内容吗?"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="clearItem()"
+            >
+              <a-button class="footer-center"  >清空内容</a-button>
+            </a-popconfirm>
           </a-col>
-          <a-col :span="8">
+          <a-col :span="6">
+            <a-button class="footer-center" @click="showBatchInput">批量输入</a-button>
+          </a-col>
+          <a-col :span="6">
             <a-button class="footer-center"  @click="removeItem(items.length - 1)" >-</a-button>
           </a-col>
-          <a-col :span="8">
+          <a-col :span="6">
             <a-button class="footer-center"  @click="addItem">+</a-button>
           </a-col>
         </a-row>
@@ -43,6 +53,9 @@
       </div>
       <a-button class="footer-center" v-else  @click="()=> image = ''">返回编辑</a-button>
     </div>
+    <a-modal style="top: 65%"  :maskClosable="false" v-model:open="batchInput.show" title="批量输入目录内容" ok-text="确认" cancel-text="取消" @ok="batchInputOk">
+      <a-textarea v-model:value="batchInput.data" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
+    </a-modal>
   <div class="footer">
     <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a></p>
   </div>
@@ -59,6 +72,10 @@ export default {
   data() {
     return {
       savedTocs: [],
+      batchInput: {
+        show:false,
+        data:''
+      },
       courseTitle: '目录总览',  // 课程标题
       courseMore: '持续更新，共计42章',  // 课程更多内容
       items: [
@@ -89,6 +106,23 @@ export default {
     setValue2(obj,field, val) {
       obj[field] = val;
       this.saveData()
+    },
+    showBatchInput(){
+      this.batchInput.show = true
+    },
+    batchInputOk(){
+      this.batchInput.show = false
+      this.saveData()
+    },
+    batchInputItem(){
+      const datas = this.batchInput.data.split("\n").filter(x => x.trim().length !== 0)
+      // 新建
+      if(this.items.length<datas.length) {
+        this.addItem()
+      }
+      datas.forEach((v,index) => {
+        this.items[index].text = v.replace(RegExp("^\\d[、.:]+"),"")
+      })
     },
     addItem() {
       this.items.push({ text: '' });

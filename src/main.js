@@ -3,7 +3,7 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import { Button, message,Input,Radio,RadioGroup,RadioButton,Row,Col,Switch,Checkbox   } from 'ant-design-vue';
+import { Button,Input, message,Radio,RadioGroup,RadioButton,Row,Col,Checkbox,Popconfirm,Modal    } from 'ant-design-vue';
 
 const app = createApp(App)
 
@@ -16,7 +16,8 @@ app.use(RadioGroup)
 app.use(RadioButton)
 app.use(Row)
 app.use(Col)
-app.use(Switch)
 app.use(Checkbox)
+app.use(Popconfirm)
+app.use(Modal)
 app.config.globalProperties.$message = message;
 app.mount('#app')
