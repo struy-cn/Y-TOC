@@ -8,7 +8,7 @@
     <div id="course-container" :class="color" v-else>
       <div class="toc title" ><div  contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
       <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
-      <div class="toc more">......<br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
+      <div class="toc more"><span contenteditable class="input-span">......</span><br><div contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
     </div>
     <div id="options">
       <div v-if="!image">
@@ -23,14 +23,15 @@
             <a-button class="footer-center"  @click="addItem">+</a-button>
           </a-col>
         </a-row>
-        <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑<br>所有内容、选项保存至本地</p>
+        <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑</p>
         <div class="footer-center">
           <a-radio-group style="width: 100%;" v-model:value="color" @change="saveData">
-            <a-radio-button style="background-color: #f5e5eb;" value="pink">&nbsp;粉&nbsp;</a-radio-button>
-            <a-radio-button style="background-color: #d9f7be;" value="green">&nbsp;绿&nbsp;</a-radio-button>
-            <a-radio-button style="background-color: #e6f4ff;" value="bule">&nbsp;蓝&nbsp;</a-radio-button>
-            <a-radio-button style="background-color: #ffccc7;" value="red">&nbsp;红&nbsp;</a-radio-button>
-            <a-radio-button style="background-color: #fff1b8;" value="golden">&nbsp;金&nbsp;</a-radio-button>
+            <a-radio-button style="background-color: #f5e5eb;" value="pink">芭比粉</a-radio-button>
+            <a-radio-button style="background-color: #d9f7be;" value="green">清新绿</a-radio-button>
+            <a-radio-button style="background-color: #e6f4ff;" value="bule">沉稳蓝</a-radio-button>
+            <a-radio-button style="background-color: #0b419a;color: #FFF;" value="morebule">法律蓝</a-radio-button>
+            <a-radio-button style="background-color: #ffccc7;" value="red">热烈红</a-radio-button>
+            <a-radio-button style="background-color: #fff1b8;" value="golden">高贵金</a-radio-button>
           </a-radio-group>
         </div>
         <a-row>
@@ -52,10 +53,12 @@
 import html2canvas from 'html2canvas';
 
 const localDataKey = "localMasterData"
+//const localSaveDataKey = "localSaveTocs"
 
 export default {
   data() {
     return {
+      savedTocs: [],
       courseTitle: '目录总览',  // 课程标题
       courseMore: '持续更新，共计42章',  // 课程更多内容
       items: [
@@ -157,6 +160,9 @@ export default {
 #course-container.bule{
   background-color: #e6f4ff;
 }
+#course-container.morebule{
+  background-color: #0b419a;
+}
 #course-container.red{
   background-color: #ffccc7;
 }
@@ -188,6 +194,9 @@ export default {
 #course-container.bule>.title{
   background-color: #5c78a5;
 }
+#course-container.morebule>.title{
+  background-color: #1173ce;
+}
 #course-container.red>.title{
   background-color: #8f282d;
 }
@@ -209,6 +218,9 @@ export default {
 #course-container.bule>.item{
   color: #40516d;
 }
+#course-container.morebule>.item{
+  color: #1f3336;
+}
 #course-container.red>.item{
   color: #5a1a1d;
 }
@@ -228,6 +240,9 @@ export default {
 }
 #course-container.bule>.item>span.index{
   color: #1349a0 !important;
+}
+#course-container.morebule>.item>span.index{
+  color: #0b419a !important;
 }
 #course-container.red>.item>span.index{
   color: #8d050c !important;
@@ -252,6 +267,9 @@ export default {
 }
 #course-container.bule>.more{
   background-color: #8eb0e5;
+}
+#course-container.morebule>.more{
+  background-color: #82a7e2;
 }
 #course-container.red>.more{
   background-color: #db787d;
@@ -309,6 +327,14 @@ span.right-bg{
 .more>span.left-bg,
 .more>span.right-bg{
     bottom: 83%;
+}
+.input-span{
+  display: inline-block;
+  min-width: 80%;
+}
+.input-span:focus{
+  outline: none;
+  border-bottom: 1px dashed #c2c2c2;
 }
 .footer{
   text-align: center;
