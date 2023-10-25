@@ -5,7 +5,7 @@
       <img  :src="image" style="width: 100%;" />
       <p style="text-align: center;background-color: #e1d0d042;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
     </div>
-    <div id="course-container" :class="color" v-else>
+    <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" v-else>
       <div class="toc title" ><div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
       <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
       <div class="toc more"><span contenteditable class="input-span">......</span><br><div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
@@ -48,11 +48,18 @@
             <a-radio-button style="background-color: #0b419a;color: #FFF;" value="morebule">法律蓝</a-radio-button>
             <a-radio-button style="background-color: #ffccc7;" value="red">热烈红</a-radio-button>
             <a-radio-button style="background-color: #fff1b8;" value="golden">高贵金</a-radio-button>
+            <a-radio-button style="background-color: #f5abb7;" value="rmb-100">至尊100</a-radio-button>
+            <a-radio-button style="background-color: #a7d4c3;" value="rmb-50">璀璨50</a-radio-button>
+            <a-radio-button style="background-color: #dba880;" value="rmb-20">荣耀20</a-radio-button>
+            <a-radio-button style="background-color: #94d2ef;" value="rmb-10">灵动10</a-radio-button>
+            <a-radio-button style="background-color: #d5c0cf;" value="rmb-5">永恒05</a-radio-button>
+            <a-radio-button style="background-color: #b0ce95;" value="rmb-1">经典01</a-radio-button>
           </a-radio-group>
         </div>
         <a-row>
           <a-col :span="24" style="text-align: center;">
             <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号从0开始</a-checkbox>
+            <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >目录窄一点</a-checkbox>
           </a-col>
         </a-row>
         <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
@@ -98,7 +105,8 @@ export default {
       ],  // 目录项列表
       image: '',  // 生成的图像
       color: 'pink',
-      startNumberZero: false
+      startNumberZero: false,
+      tocSmallWidth: false
     };
   },
   created() {
@@ -168,6 +176,7 @@ export default {
         this.items = data.items
         this.color = data.color
         this.startNumberZero = data.startNumberZero
+        this.tocSmallWidth = data.tocSmallWidth
       }
     },
     saveData(){
@@ -176,7 +185,8 @@ export default {
         courseMore: this.courseMore,
         items:this.items,
         color:this.color,
-        startNumberZero:this.startNumberZero
+        startNumberZero:this.startNumberZero,
+        tocSmallWidth:this.tocSmallWidth
       }
       const dataStr = JSON.stringify(data)
       localStorage.setItem(localDataKey,dataStr)
@@ -198,8 +208,11 @@ export default {
   width: 100%;
   max-width: 430px;
   min-width: 375px;
-  padding: 2px;
+  padding: 5px 2px;
   border-radius: 2px;
+}
+#course-container.toc-small{
+  padding: 5px 25px;
 }
 #course-container.pink{
   background-color: #f5e5eb;
@@ -218,6 +231,24 @@ export default {
 }
 #course-container.golden{
   background-color: #fff1b8;
+}
+#course-container.rmb-100{
+  background-color: #f5abb7;
+}
+#course-container.rmb-50{
+  background-color: #a7d4c3;
+}
+#course-container.rmb-20{
+  background-color: #dba880;
+}
+#course-container.rmb-10{
+  background-color: #94d2ef;
+}
+#course-container.rmb-5{
+  background-color: #d5c0cf;
+}
+#course-container.rmb-1{
+  background-color: #b0ce95;
 }
 .toc {
   padding: 10px;
@@ -253,6 +284,24 @@ export default {
 #course-container.golden>.title{
   background-color: #9e7020;
 }
+#course-container.rmb-100>.title{
+  background-color: #cb364a;
+}
+#course-container.rmb-50>.title{
+  background-color: #3d6756;
+}
+#course-container.rmb-20>.title{
+  background-color: #8d4b45;
+}
+#course-container.rmb-10>.title{
+  background-color: #355386;
+}
+#course-container.rmb-5>.title{
+  background-color: #2d1c4d;
+}
+#course-container.rmb-1>.title{
+  background-color: #4d584c;
+}
 
 .item{
   background-color:#ffffff;
@@ -276,6 +325,24 @@ export default {
 }
 #course-container.golden>.item{
   color: #664815;
+}
+#course-container.rmb-100>.item{
+  color: #be0f2d;
+}
+#course-container.rmb-50>.item{
+  color: #3d6756;
+}
+#course-container.rmb-20>.item{
+  color: #8d4b45;
+}
+#course-container.rmb-10>.item{
+  color: #355386;
+}
+#course-container.rmb-5>.item{
+  color: #2d1c4d;
+}
+#course-container.rmb-1>.item{
+  color: #4d584c;
 }
 
 .item>span.index{
@@ -327,6 +394,24 @@ export default {
 #course-container.golden>.more{
   background-color: #f1c475;
   color: #664815;
+}
+#course-container.rmb-100>.more{
+  background-color: #d55f6f;
+}
+#course-container.rmb-50>.more{
+  background-color: #509a80;
+}
+#course-container.rmb-20>.more{
+  background-color: #a05d46;
+}
+#course-container.rmb-10>.more{
+  background-color: #5091c0;
+}
+#course-container.rmb-5>.more{
+  background-color: #684e94;
+}
+#course-container.rmb-1>.more{
+  background-color: #6a855b;
 }
 span.left-line{
    position: absolute;
