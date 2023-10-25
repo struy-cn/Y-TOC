@@ -24,13 +24,19 @@
             </a-popconfirm>
           </a-col>
           <a-col :span="6">
-            <a-button class="footer-center" @click="showBatchInput">批量输入</a-button>
+            <a-button class="footer-center" @click="showBatchInput">{{ batchInput.show?'输入完成':'批量输入' }}</a-button>
           </a-col>
           <a-col :span="6">
             <a-button class="footer-center"  @click="removeItem(items.length - 1)" >-</a-button>
           </a-col>
           <a-col :span="6">
             <a-button class="footer-center"  @click="addItem">+</a-button>
+          </a-col>
+        </a-row>
+        <a-row v-if="batchInput.show">
+          <a-col :span="24">
+            <p class="footer-center">批量输入目录内容，换行分隔，自动排序</p>
+            <a-textarea v-model:value="batchInput.data" @blur="batchInputOk" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
           </a-col>
         </a-row>
         <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑</p>
@@ -53,9 +59,9 @@
       </div>
       <a-button class="footer-center" v-else  @click="()=> image = ''">返回编辑</a-button>
     </div>
-    <a-modal style="top: 65%"  :maskClosable="false" v-model:open="batchInput.show" title="批量输入目录内容" ok-text="确认" cancel-text="取消" @ok="batchInputOk">
+    <!-- <a-modal style="top: 65%"  :maskClosable="false" v-model:open="batchInput.show" title="批量输入目录内容" ok-text="确认" cancel-text="取消" @ok="batchInputOk">
       <a-textarea v-model:value="batchInput.data" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
-    </a-modal>
+    </a-modal> -->
   <div class="footer">
     <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a></p>
   </div>
@@ -101,14 +107,21 @@ export default {
   methods: {
     setValue(field, val) {
       this[field] = val;
+      this.initBatchInputData()
       this.saveData()
     },
     setValue2(obj,field, val) {
       obj[field] = val;
+      this.initBatchInputData()
       this.saveData()
     },
     showBatchInput(){
-      this.batchInput.show = true
+      this.batchInput.show = !this.batchInput.show
+      // 初始化数据
+      this.initBatchInputData()
+    },
+    initBatchInputData(){
+      this.batchInput.data = this.items.map((x) => x.text).filter(x => x.trim().length !== 0).join("\n")
     },
     batchInputOk(){
       this.batchInput.show = false
@@ -119,10 +132,13 @@ export default {
       // 新建
       if(this.items.length<datas.length) {
         this.addItem()
+      }else if(this.items.length>datas.length){
+        this.removeItem(this.items.length-1)
       }
       datas.forEach((v,index) => {
-        this.items[index].text = v.replace(RegExp("^\\d[、.:]+"),"")
+        this.items[index].text = v.replace(RegExp("^\\d+[、.:]+"),"")
       })
+      this.saveData()
     },
     addItem() {
       this.items.push({ text: '' });
