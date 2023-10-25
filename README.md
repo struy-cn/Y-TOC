@@ -1,36 +1,32 @@
-# class_toc_gen
+# Y-TOC
 
-This template should help get you started developing with Vue 3 in Vite.
+一个内容目录海报美化生成工具。
 
-## Recommended IDE Setup
+访问：[https://toc.struy.cn/](https://toc.struy.cn/) 使用
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+觉得有用的话：[打赏一下喝杯水](https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3)
 
-## Customize configuration
+别人的付费内容如此有条理和逼格，你也可以快速拥有
+1、打开工具页面（电脑、手机都可）
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+2、填写你的目录内容
 
-## Project Setup
+3、生成分享图保存
 
-```sh
-npm install
-```
+4、作为你的付费内容、课程的总览，逼格满满，诚意满满
 
-### Compile and Hot-Reload for Development
+最新特性：
 
-```sh
-npm run dev
-```
+1、支持 5 个颜色主题切换
 
-### Compile and Minify for Production
+2、支持本地缓存，下次可以接着用
 
-```sh
-npm run build
-```
+3、新增批量输入目录内容（直接输入整理好的目录，一次粘贴，避免一个个输入，中间插入自动排序
 
-### Lint with [ESLint](https://eslint.org/)
+## 生成演示:
 
-```sh
-npm run lint
-```
-# class_toc_gen
+![使用](other/use.gif)
+
+## 生成效果预览:
+
+![效果预览](other/preview1.png)

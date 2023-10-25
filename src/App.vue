@@ -63,7 +63,7 @@
       <a-textarea v-model:value="batchInput.data" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
     </a-modal> -->
   <div class="footer">
-    <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a></p>
+    <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a>｜<a href="https://github.com/struy-cn/Y-TOC">Github</a></p>
   </div>
   </div>
 </template>
