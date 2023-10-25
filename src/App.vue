@@ -149,8 +149,8 @@ export default {
       this.saveData()
     },
     clearItem() {
-      this.courseTitle = '标题'
-      this.courseMore = 'more'
+      this.courseTitle = '目录总览'
+      this.courseMore = '持续更新'
       this.items.forEach(x => x.text = '')
       document.querySelector('.input-span').focus()
       this.saveData()
