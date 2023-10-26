@@ -9,6 +9,15 @@
       <div class="toc title" ><div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
       <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
       <div class="toc more"><span contenteditable class="input-span">......</span><br><div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
+      <div class="toc" v-if="showQRCode">
+        <div class="footer-center">
+          <span contenteditable class="input-span">扫描二维码</span>
+        </div>
+        <!-- 居中显示二维码 -->
+        <div class="qrcode" style=" display: grid;place-items: center;">
+          <a-qrcode size="100" value="https:/toc.struy.cn" />
+        </div>
+      </div>
     </div>
     <div id="options">
       <div v-if="!image">
@@ -60,6 +69,7 @@
           <a-col :span="24" style="text-align: center;">
             <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号从0开始</a-checkbox>
             <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >目录窄一点</a-checkbox>
+            <!-- <a-checkbox  v-model:checked="showQRCode" @change="saveData" >底部二维码</a-checkbox> -->
           </a-col>
         </a-row>
         <a-row>
@@ -109,7 +119,8 @@
         </a-row>
       </div>
       <template v-else>
-        <p style="text-align: center;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
+        <p style="text-align: center;">微信请长按分享或保存图片<br>浏览器可右键或点击下方按钮保存</p>
+        <a-button class="footer-center"  @click="dowloadImage">下载图片</a-button>
         <a-button class="footer-center"  @click="()=> image = ''">返回编辑</a-button>
       </template>
     </div>
@@ -155,7 +166,8 @@ export default {
       image: '',  // 生成的图像
       color: 'pink',
       startNumberZero: false,
-      tocSmallWidth: false
+      tocSmallWidth: false,
+      showQRCode: false
     };
   },
   created() {
@@ -296,6 +308,14 @@ export default {
         this.image = image
         this.saveData()
       });
+    },
+    async dowloadImage(){
+      const a = document.createElement('a');
+      a.download = this.courseTitle+'.png';
+      a.href = this.image;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   }
 };
