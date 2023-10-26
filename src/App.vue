@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div style="max-width: 430px;
+    min-width: 375px;">
     <div v-if="image" style="width: 100%; height: 100%;">
       <!-- 生成的图像 -->
       <img  :src="image" style="width: 100%;" />
