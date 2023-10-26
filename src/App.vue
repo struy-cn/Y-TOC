@@ -1,10 +1,9 @@
 <template>
   <div style="max-width: 430px;
     min-width: 375px;">
-    <div v-if="image" style="width: 100%; height: 100%;">
+    <div v-if="image" style="width: 100%;">
       <!-- 生成的图像 -->
       <img  :src="image" style="width: 100%;" />
-      <p style="text-align: center;background-color: #e1d0d042;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
     </div>
     <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" v-else>
       <div class="toc title" ><div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
@@ -40,7 +39,7 @@
             <a-textarea v-model:value="batchInput.data" @blur="batchInputOk" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
           </a-col>
         </a-row>
-        <p style="text-align: center;">点击+添加目录项，点击-移除最后一项<br>所有内容可编辑，点击内容进行编辑</p>
+        <p v-if="!batchInput.show" style="text-align: center;">点击内容进行编辑，选择主题，生成图片</p>
         <div class="footer-center">
           <a-radio-group style="width: 100%;" v-model:value="color" @change="saveData">
             <a-radio-button style="background-color: #f5e5eb;" value="pink">芭比粉</a-radio-button>
@@ -63,13 +62,57 @@
             <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >目录窄一点</a-checkbox>
           </a-col>
         </a-row>
-        <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
+        <a-row>
+          <a-col :span="24" style="text-align: center;">
+            <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="12" style="text-align: center;">
+            <a-button class="footer-center"  @click="openSaveAs">另存当前配置到本地</a-button>
+          </a-col>
+          <a-col :span="12" style="text-align: center;">
+            <a-button class="footer-center"  @click="showAllConfig">选择已保存配置({{ savedTocs.data.length }})</a-button>
+          </a-col>
+        </a-row>
+        <a-row  v-if="savedTocs.show">
+          <a-col :span="24">
+            <a-input class="footer-center" v-model:value="currConfigTitle" placeholder="输入当前配置名称，并点击保存" ></a-input>
+            <a-button class="footer-center" @click="saveAs" >保存</a-button>
+          </a-col>
+        </a-row>
+        <a-row v-if="allConfigShow">
+          <a-col :span="24">
+            <p v-if="savedTocs.data.length > 0" class="footer-center">点击替换当前设置，点击x删除配置</p>
+            <p v-else class="footer-center">暂无配置，最多可保存 10 个配置</p>
+            <template v-for="(item, index) in savedTocs.data" :key="index">
+              <div style="width: 90%;margin: 5px 5%;">
+                <a-popconfirm
+                  title="确认替换当前内容和配置吗?"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="useThisConfig(item)"
+                >
+                  <a-button style="width: 85%;" type="dashed">{{ item.configName }}</a-button >
+                </a-popconfirm>
+                <a-popconfirm
+                  title="删除此配置吗?"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteThisConfig(index)"
+                >
+                  <a-button style="width: 15%;" type="link" danger>x</a-button>
+                </a-popconfirm>
+              </div>
+            </template>
+          </a-col>
+        </a-row>
       </div>
-      <a-button class="footer-center" v-else  @click="()=> image = ''">返回编辑</a-button>
+      <template v-else>
+        <p style="text-align: center;">微信请长按分享或保存图片<br>浏览器请右键保存(电脑会更清晰)</p>
+        <a-button class="footer-center"  @click="()=> image = ''">返回编辑</a-button>
+      </template>
     </div>
-    <!-- <a-modal style="top: 65%"  :maskClosable="false" v-model:open="batchInput.show" title="批量输入目录内容" ok-text="确认" cancel-text="取消" @ok="batchInputOk">
-      <a-textarea v-model:value="batchInput.data" @change="batchInputItem" placeholder="一行作为一个标题，可粘贴整理好的换行内容，有序号会自动去除" :auto-size="{ minRows: 5, maxRows: 20 }"></a-textarea>
-    </a-modal> -->
   <div class="footer">
     <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a>｜<a href="https://github.com/struy-cn/Y-TOC">Github</a></p>
   </div>
@@ -80,16 +123,21 @@
 import html2canvas from 'html2canvas';
 
 const localDataKey = "localMasterData"
-//const localSaveDataKey = "localSaveTocs"
+const localSaveDataKey = "localSaveTocs"
 
 export default {
   data() {
     return {
-      savedTocs: [],
       batchInput: {
         show:false,
         data:''
       },
+      savedTocs:{
+        show:false,
+        data:[]
+      },
+      allConfigShow: false,
+      currConfigTitle: '',
       courseTitle: '目录总览',  // 课程标题
       courseMore: '持续更新，共计42章',  // 课程更多内容
       items: [
@@ -172,15 +220,22 @@ export default {
       const dataStr = localStorage.getItem(localDataKey)
       if(dataStr){
         const data = JSON.parse(dataStr)
+        this.setDataToCurr(data)
+      }
+      const savedTocsStr = localStorage.getItem(localSaveDataKey)
+      if(savedTocsStr){
+        this.savedTocs.data = JSON.parse(savedTocsStr)
+      }
+    },
+    setDataToCurr(data){
         this.courseTitle = data.courseTitle
         this.courseMore = data.courseMore
         this.items = data.items
         this.color = data.color
         this.startNumberZero = data.startNumberZero
         this.tocSmallWidth = data.tocSmallWidth
-      }
     },
-    saveData(){
+    getCurrData(){
       const data = {
         courseTitle: this.courseTitle,
         courseMore: this.courseMore,
@@ -189,8 +244,50 @@ export default {
         startNumberZero:this.startNumberZero,
         tocSmallWidth:this.tocSmallWidth
       }
-      const dataStr = JSON.stringify(data)
+      return data
+    },
+    saveData(){
+      const dataStr = JSON.stringify(this.getCurrData())
       localStorage.setItem(localDataKey,dataStr)
+    },
+    openSaveAs(){
+      this.savedTocs.show = !this.savedTocs.show
+    },
+    saveAs(){
+      if(this.savedTocs.data.length === 10){
+        this.$message.warning('最多只能保存10个配置，查看已有配置进行删除')
+        this.savedTocs.show = false
+        return
+      }
+      if(this.currConfigTitle){
+        if(this.savedTocs.data.find(x => x['configName'] === this.currConfigTitle)){
+          this.$message.warning('配置名称已存在，请重新输入')
+          return
+        }
+        this.savedTocs.show = false
+        const data = this.getCurrData()
+        data['configName'] = this.currConfigTitle
+        this.savedTocs.data.push(data)
+        this.saveTocsToLocal()
+        this.$message.success('保存成功')
+      }else{
+        this.$message.warning('请输入配置名称')
+      }
+    },
+    saveTocsToLocal(){
+      const dataStr = JSON.stringify(this.savedTocs.data)
+      localStorage.setItem(localSaveDataKey,dataStr)
+    },
+    showAllConfig(){
+      this.allConfigShow = !this.allConfigShow
+    },
+    useThisConfig(data){
+      this.setDataToCurr(data)
+    },
+    deleteThisConfig(index){
+      this.savedTocs.data.splice(index,1)
+      this.saveTocsToLocal()
+      this.$message.warning('已删除')
     },
     shareImage() {
       html2canvas(document.querySelector('#course-container'),{scale:3,dpi:350}).then(canvas => {

@@ -2,12 +2,10 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
-import { Button,Input, message,Radio,RadioGroup,RadioButton,Row,Col,Checkbox,Popconfirm,Modal    } from 'ant-design-vue';
+import { Button,Input, message,Radio,RadioGroup,RadioButton,Row,Col,Checkbox,Popconfirm,Divider} from 'ant-design-vue';
 
 const app = createApp(App)
 
-app.use(router)
 /* 会自动注册 Button 下的子组件, 例如 Button.Group */
 app.use(Button)
 app.use(Input)
@@ -18,6 +16,6 @@ app.use(Row)
 app.use(Col)
 app.use(Checkbox)
 app.use(Popconfirm)
-app.use(Modal)
+app.use(Divider)
 app.config.globalProperties.$message = message;
 app.mount('#app')

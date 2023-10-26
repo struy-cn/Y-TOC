@@ -10,11 +10,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@ant-design/icons-vue": "^7.0.1",
     "ant-design-vue": "^4.0.6",
     "html2canvas": "^1.4.1",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4"
+    "vue": "^3.3.4"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.3.3",
