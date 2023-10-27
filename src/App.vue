@@ -249,7 +249,7 @@ export default {
       QRcodeSelect:{
         isFlie:false,
         file:null,
-        data:'https://toc.struy.cn'
+        data:'http://weixin.qq.com/r/f0jP15vEjsbxrd_09x1t'
       },
       batchInput: {
         show:false,
