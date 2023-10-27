@@ -317,7 +317,7 @@ export default {
         this.removeItem(this.items.length-1)
       }
       datas.forEach((v,index) => {
-        this.items[index].text = v.replace(RegExp("^\\d+[、.:]+"),"")
+        this.items[index].text = v.replace(RegExp("^\\d+[、]+"),"")
       })
       this.saveData()
     },
