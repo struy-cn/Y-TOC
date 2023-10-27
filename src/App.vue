@@ -249,7 +249,7 @@ export default {
       QRcodeSelect:{
         isFlie:false,
         file:null,
-        data:'http://weixin.qq.com/r/f0jP15vEjsbxrd_09x1t'
+        data:'https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3'
       },
       batchInput: {
         show:false,
