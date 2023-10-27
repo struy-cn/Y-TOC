@@ -9,18 +9,37 @@
       <div class="toc title" ><div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
       <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
       <div class="toc more"><span contenteditable class="input-span">......</span><br><div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
-      <div class="toc" v-if="showQRCode">
+      <div style="margin-bottom: 10px;" v-if="showQRCode">
+        <a-divider style="width: 90%;margin:0;"></a-divider>
         <div class="footer-center">
-          <span contenteditable class="input-span">扫描二维码</span>
+          <span contenteditable class="input-span" style="font-size: 12px;" :style="{color: colorConfigs[color]['moreBackground']}">扫描二维码了解更多</span>
         </div>
         <!-- 居中显示二维码 -->
         <div class="qrcode" style=" display: grid;place-items: center;">
-          <a-qrcode size="100" value="https:/toc.struy.cn" />
+          <img v-if="QRcodeSelect.isFlie&&QRcodeSelect.file" style="width: 100px;height: 100px;border-radius: 4px;object-fit: cover;"  :src="QRcodeSelect.file" @click="showQRcodeChange"/>
+          <a-qrcode v-else  :size="100" errorLevel="H" :value="QRcodeSelect.data" :color="colorConfigs[color]['moreBackground']"  @click="showQRcodeChange" />
         </div>
       </div>
     </div>
     <div id="options">
       <div v-if="!image">
+        <a-row v-if="showQRCode">
+          <a-col :span="24">
+            <p class="footer-center">将以下链接转换为二维码</p>
+            <a-input class="footer-center" placeholder="输入链接更新二维码" v-model:value="QRcodeSelect.data" @change="() => {QRcodeSelect.isFlie = false;saveData()}"></a-input>
+            <a-upload
+            :show-upload-list="false"
+            class="footer-center"
+            style="display: block;"
+              :maxCount="1"
+              accept="image/*"
+              @change="QRcodeFileChange"
+              :before-upload="beforeQRcodeUpload"
+            >
+              <a-button ref="uploadQRcodeRef">或点此选择码图片(小于2MB)</a-button>
+            </a-upload>
+          </a-col>
+        </a-row>
         <a-row>
           <a-col :span="6">
             <a-popconfirm
@@ -69,7 +88,7 @@
           <a-col :span="24" style="text-align: center;">
             <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号从0开始</a-checkbox>
             <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >目录窄一点</a-checkbox>
-            <!-- <a-checkbox  v-model:checked="showQRCode" @change="saveData" >底部二维码</a-checkbox> -->
+            <a-checkbox  v-model:checked="showQRCode" @change="saveData" >底部二维码</a-checkbox>
           </a-col>
         </a-row>
         <a-row>
@@ -135,10 +154,103 @@ import html2canvas from 'html2canvas';
 
 const localDataKey = "localMasterData"
 const localSaveDataKey = "localSaveTocs"
+// 颜色全局配置
+const colorConfigs = {
+  pink:{
+    background:'#f5e5eb',
+    titleBackground:'#71403f',
+    moreBackground:'#c48080',
+    tocIndexColor:'#963e5b',
+    tocTitleColor:'#412A2D'
+  },
+  green:{
+    background:'#d9f7be',
+    titleBackground:'#5d864b',
+    moreBackground:'#8cc972',
+    tocIndexColor:'#2c6912',
+    tocTitleColor:'#48633c'
+  },
+  bule:{
+    background:'#e6f4ff',
+    titleBackground:'#5c78a5',
+    moreBackground:'#8eb0e5',
+    tocIndexColor:'#1349a0',
+    tocTitleColor:'#40516d'
+  },
+  morebule:{
+    background:'#0b419a',
+    titleBackground:'#1173ce',
+    moreBackground:'#82a7e2',
+    tocIndexColor:'#0b419a',
+    tocTitleColor:'#1f3336'
+  },
+  red:{
+    background:'#ffccc7',
+    titleBackground:'#8f282d',
+    moreBackground:'#db787d',
+    tocIndexColor:'#8d050c',
+    tocTitleColor:'#5a1a1d'
+  },
+  golden:{
+    background:'#fff1b8',
+    titleBackground:'#9e7020',
+    moreBackground:'#f1c475',
+    tocIndexColor:'#ac7414',
+    tocTitleColor:'#664815'
+  },
+  'rmb-100':{
+    background:'#f5abb7',
+    titleBackground:'#cb364a',
+    moreBackground:'#d55f6f',
+    tocIndexColor:'#be0f2d',
+    tocTitleColor:'#be0f2d'
+  },
+  'rmb-50':{
+    background:'#a7d4c3',
+    titleBackground:'#3d6756',
+    moreBackground:'#509a80',
+    tocIndexColor:'#3d6756',
+    tocTitleColor:'#3d6756'
+  },
+  'rmb-20':{
+    background:'#dba880',
+    titleBackground:'#8d4b45',
+    moreBackground:'#a05d46',
+    tocIndexColor:'#8d4b45',
+    tocTitleColor:'#8d4b45'
+  },
+  'rmb-10':{
+    background:'#94d2ef',
+    titleBackground:'#355386',
+    moreBackground:'#5091c0',
+    tocIndexColor:'#355386',
+    tocTitleColor:'#355386'
+  },
+  'rmb-5':{
+    background:'#d5c0cf',
+    titleBackground:'#2d1c4d',
+    moreBackground:'#684e94',
+    tocIndexColor:'#2d1c4d',
+    tocTitleColor:'#2d1c4d'
+  },
+  'rmb-1':{
+    background:'#b0ce95',
+    titleBackground:'#4d584c',
+    moreBackground:'#6a855b',
+    tocIndexColor:'#4d584c',
+    tocTitleColor:'#4d584c'
+  }
+}
 
 export default {
   data() {
     return {
+      colorConfigs:colorConfigs,
+      QRcodeSelect:{
+        isFlie:false,
+        file:null,
+        data:'https://toc.struy.cn'
+      },
       batchInput: {
         show:false,
         data:''
@@ -246,6 +358,10 @@ export default {
         this.color = data.color
         this.startNumberZero = data.startNumberZero
         this.tocSmallWidth = data.tocSmallWidth
+        this.showQRCode = data.showQRCode
+        if(data.QRcodeSelect){
+          this.QRcodeSelect = data.QRcodeSelect
+        }
     },
     getCurrData(){
       const data = {
@@ -254,7 +370,9 @@ export default {
         items:this.items,
         color:this.color,
         startNumberZero:this.startNumberZero,
-        tocSmallWidth:this.tocSmallWidth
+        tocSmallWidth:this.tocSmallWidth,
+        showQRCode:this.showQRCode,
+        QRcodeSelect: this.QRcodeSelect
       }
       return data
     },
@@ -300,6 +418,30 @@ export default {
       this.savedTocs.data.splice(index,1)
       this.saveTocsToLocal()
       this.$message.warning('已删除')
+    },
+    showQRcodeChange(){
+      console.log('showQRcodeChange')
+    },
+    beforeQRcodeUpload(file){
+      const isLt2M = file.size / 1024 / 1024 < 2
+      if (!isLt2M) {
+        this.$message.error('图像不能大于 2MB!')
+      }
+      return isLt2M
+    },
+    QRcodeFileChange({ file }){
+      if (file.status !== 'uploading') {
+        this.getBase64(file.originFileObj, base64Url => {
+          this.QRcodeSelect.file = base64Url
+          this.QRcodeSelect.isFlie = true
+          this.saveData()
+        });
+      }
+    },
+    getBase64(img, callback) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => callback(reader.result));
+      reader.readAsDataURL(img);
     },
     shareImage() {
       html2canvas(document.querySelector('#course-container'),{scale:3,dpi:350}).then(canvas => {

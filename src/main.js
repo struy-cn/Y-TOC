@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import { Button,Input, message,Radio,RadioGroup,RadioButton,Row,Col,Checkbox,Popconfirm,Divider,QRCode} from 'ant-design-vue';
+import { Button,Input, message,Radio,RadioGroup,RadioButton,Row,Col,Checkbox,Popconfirm,Divider,QRCode,Upload} from 'ant-design-vue';
 
 const app = createApp(App)
 
@@ -18,5 +18,7 @@ app.use(Checkbox)
 app.use(Popconfirm)
 app.use(Divider)
 app.use(QRCode)
+app.use(Upload)
+app.use(message)
 app.config.globalProperties.$message = message;
 app.mount('#app')
