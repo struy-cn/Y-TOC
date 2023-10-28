@@ -5,10 +5,20 @@
       <!-- 生成的图像 -->
       <img  :src="image" style="width: 100%;" />
     </div>
-    <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" v-else>
-      <div class="toc title" ><div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span></div>
-      <div class="toc item" v-for="(item, index) in items" :key="index"><span class="index">{{ startNumber(index) }}</span><span class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span></div>
-      <div class="toc more"><span contenteditable class="input-span">......</span><br><div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div><span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span></div>
+    <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" :style="{backgroundColor: colorConfigs[color]['background']}" v-else>
+      <div class="toc title" :style="{backgroundColor: colorConfigs[color]['titleBackground']}" >
+        <div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div>
+        <span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span>
+      </div>
+      <div class="toc item" v-for="(item, index) in items" :key="index">
+        <span class="index" :style="{color: colorConfigs[color]['tocIndexColor']}">{{ startNumber(index) }}</span>
+        <span :style="{color: colorConfigs[color]['tocTitleColor']}" class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
+      </div>
+      <div class="toc more" :style="{backgroundColor: colorConfigs[color]['moreBackground']}">
+        <span contenteditable class="input-span">......</span><br>
+        <div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div>
+        <span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span>
+      </div>
       <div style="margin-bottom: 10px;" v-if="showQRCode">
         <a-divider style="width: 90%;margin:0;"></a-divider>
         <div class="footer-center">
@@ -70,18 +80,7 @@
         <p v-if="!batchInput.show" style="text-align: center;">点击内容进行编辑，选择主题，生成图片</p>
         <div class="footer-center">
           <a-radio-group style="width: 100%;" v-model:value="color" @change="saveData">
-            <a-radio-button style="background-color: #f5e5eb;" value="pink">芭比粉</a-radio-button>
-            <a-radio-button style="background-color: #d9f7be;" value="green">清新绿</a-radio-button>
-            <a-radio-button style="background-color: #e6f4ff;" value="bule">沉稳蓝</a-radio-button>
-            <a-radio-button style="background-color: #0b419a;color: #FFF;" value="morebule">法律蓝</a-radio-button>
-            <a-radio-button style="background-color: #ffccc7;" value="red">热烈红</a-radio-button>
-            <a-radio-button style="background-color: #fff1b8;" value="golden">高贵金</a-radio-button>
-            <a-radio-button style="background-color: #f5abb7;" value="rmb-100">至尊100</a-radio-button>
-            <a-radio-button style="background-color: #a7d4c3;" value="rmb-50">璀璨50</a-radio-button>
-            <a-radio-button style="background-color: #dba880;" value="rmb-20">荣耀20</a-radio-button>
-            <a-radio-button style="background-color: #94d2ef;" value="rmb-10">灵动10</a-radio-button>
-            <a-radio-button style="background-color: #d5c0cf;" value="rmb-5">永恒05</a-radio-button>
-            <a-radio-button style="background-color: #b0ce95;" value="rmb-1">经典01</a-radio-button>
+            <a-radio-button v-for="(value, key) in colorConfigs" :key="key" :style="{backgroundColor: value.background,color:key === 'morebule'?'#fff':''}" :value="key">{{ value.name }}</a-radio-button>
           </a-radio-group>
         </div>
         <a-row>
@@ -157,6 +156,7 @@ const localSaveDataKey = "localSaveTocs"
 // 颜色全局配置
 const colorConfigs = {
   pink:{
+    name:'芭比粉',
     background:'#f5e5eb',
     titleBackground:'#71403f',
     moreBackground:'#c48080',
@@ -164,6 +164,7 @@ const colorConfigs = {
     tocTitleColor:'#412A2D'
   },
   green:{
+    name:'清新绿',
     background:'#d9f7be',
     titleBackground:'#5d864b',
     moreBackground:'#8cc972',
@@ -171,6 +172,7 @@ const colorConfigs = {
     tocTitleColor:'#48633c'
   },
   bule:{
+    name:'沉稳蓝',
     background:'#e6f4ff',
     titleBackground:'#5c78a5',
     moreBackground:'#8eb0e5',
@@ -178,6 +180,7 @@ const colorConfigs = {
     tocTitleColor:'#40516d'
   },
   morebule:{
+    name:'法律蓝',
     background:'#0b419a',
     titleBackground:'#1173ce',
     moreBackground:'#82a7e2',
@@ -185,6 +188,7 @@ const colorConfigs = {
     tocTitleColor:'#1f3336'
   },
   red:{
+    name:'热烈红',
     background:'#ffccc7',
     titleBackground:'#8f282d',
     moreBackground:'#db787d',
@@ -192,6 +196,7 @@ const colorConfigs = {
     tocTitleColor:'#5a1a1d'
   },
   golden:{
+    name:'高贵金',
     background:'#fff1b8',
     titleBackground:'#9e7020',
     moreBackground:'#f1c475',
@@ -199,6 +204,7 @@ const colorConfigs = {
     tocTitleColor:'#664815'
   },
   'rmb-100':{
+    name:'至尊100',
     background:'#f5abb7',
     titleBackground:'#cb364a',
     moreBackground:'#d55f6f',
@@ -206,6 +212,7 @@ const colorConfigs = {
     tocTitleColor:'#be0f2d'
   },
   'rmb-50':{
+    name:'璀璨50',
     background:'#a7d4c3',
     titleBackground:'#3d6756',
     moreBackground:'#509a80',
@@ -213,6 +220,7 @@ const colorConfigs = {
     tocTitleColor:'#3d6756'
   },
   'rmb-20':{
+    name:'荣耀20',
     background:'#dba880',
     titleBackground:'#8d4b45',
     moreBackground:'#a05d46',
@@ -220,6 +228,7 @@ const colorConfigs = {
     tocTitleColor:'#8d4b45'
   },
   'rmb-10':{
+    name:'灵动10',
     background:'#94d2ef',
     titleBackground:'#355386',
     moreBackground:'#5091c0',
@@ -227,6 +236,7 @@ const colorConfigs = {
     tocTitleColor:'#355386'
   },
   'rmb-5':{
+    name:'永恒05',
     background:'#d5c0cf',
     titleBackground:'#2d1c4d',
     moreBackground:'#684e94',
@@ -234,6 +244,7 @@ const colorConfigs = {
     tocTitleColor:'#2d1c4d'
   },
   'rmb-1':{
+    name:'经典01',
     background:'#b0ce95',
     titleBackground:'#4d584c',
     moreBackground:'#6a855b',
@@ -262,7 +273,7 @@ export default {
       allConfigShow: false,
       currConfigTitle: '',
       courseTitle: '目录总览',  // 课程标题
-      courseMore: '持续更新，共计42章',  // 课程更多内容
+      courseMore: '持续更新',  // 课程更多内容
       items: [
         { text: '童年：被遗弃与选择' },
         { text: '奇特的一对：两个史蒂夫' },
@@ -312,9 +323,15 @@ export default {
       const datas = this.batchInput.data.split("\n").filter(x => x.trim().length !== 0)
       // 新建
       if(this.items.length<datas.length) {
-        this.addItem()
+        const addRow = datas.length - this.items.length
+        for(let i=0;i<addRow;i++){
+          this.addItem() 
+        }
       }else if(this.items.length>datas.length){
-        this.removeItem(this.items.length-1)
+        const delRow = this.items.length - datas.length
+        for(let i=0;i<delRow;i++){
+          this.removeItem(this.items.length-1) 
+        }
       }
       datas.forEach((v,index) => {
         this.items[index].text = v.replace(RegExp("^\\d+[、]+"),"")
@@ -474,7 +491,7 @@ export default {
 #course-container.toc-small{
   padding: 5px 25px;
 }
-#course-container.pink{
+/* #course-container.pink{
   background-color: #f5e5eb;
 }
 #course-container.green{
@@ -509,7 +526,7 @@ export default {
 }
 #course-container.rmb-1{
   background-color: #b0ce95;
-}
+} */
 .toc {
   padding: 10px;
   width: 95%;
@@ -526,7 +543,7 @@ export default {
   font-weight: 600;
   position: relative;
 }
-#course-container.pink>.title{
+/* #course-container.pink>.title{
   background-color: #71403f;
 }
 #course-container.green>.title{
@@ -561,13 +578,13 @@ export default {
 }
 #course-container.rmb-1>.title{
   background-color: #4d584c;
-}
+} */
 
 .item{
   background-color:#ffffff;
   margin-bottom: 5px;
 }
-
+/* 
 #course-container.pink>.item{
   color: #412A2D;
 }
@@ -603,12 +620,12 @@ export default {
 }
 #course-container.rmb-1>.item{
   color: #4d584c;
-}
+} */
 
 .item>span.index{
   margin-right: 10px;
 }
-
+/* 
 #course-container.pink>.item>span.index{
   color: #963e5b !important;
 }
@@ -626,7 +643,7 @@ export default {
 }
 #course-container.golden>.item>span.index{
   color: #ac7414 !important;
-}
+} */
 
 .more{
   color: #ffffff;
@@ -636,7 +653,7 @@ export default {
   margin-top: 10px;
   position: relative;
 }
-#course-container.pink>.more{
+/* #course-container.pink>.more{
   background-color: #c48080;
 }
 #course-container.green>.more{
@@ -672,7 +689,7 @@ export default {
 }
 #course-container.rmb-1>.more{
   background-color: #6a855b;
-}
+} */
 span.left-line{
    position: absolute;
     height: 40%;
