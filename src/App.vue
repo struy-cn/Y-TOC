@@ -7,26 +7,28 @@
     </div>
     <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" :style="{backgroundColor: colorConfigs[color]['background']}" v-else>
       <div class="toc title" :style="{backgroundColor: colorConfigs[color]['titleBackground']}" >
-        <div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div>
+        <div class="input-span" contenteditable="plaintext-only" v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div>
         <span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span>
       </div>
       <div class="toc item" v-for="(item, index) in items" :key="index">
         <span class="index" :style="{color: colorConfigs[color]['tocIndexColor']}">{{ startNumber(index) }}</span>
-        <span :style="{color: colorConfigs[color]['tocTitleColor']}" class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
+        <span :style="{color: colorConfigs[color]['tocTitleColor']}" class="input-span" contenteditable="plaintext-only" v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
       </div>
       <div class="toc more" :style="{backgroundColor: colorConfigs[color]['moreBackground']}">
-        <span contenteditable class="input-span">......</span><br>
-        <div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div>
+        <span contenteditable="plaintext-only" class="input-span">......</span><br>
+        <div class="input-span" contenteditable="plaintext-only" v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div>
         <span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span>
       </div>
       <div style="margin-bottom: 10px;" v-if="showQRCode">
         <a-divider style="width: 90%;margin:0;"></a-divider>
         <div class="footer-center">
-          <span contenteditable class="input-span" style="font-size: 12px;" :style="{color: colorConfigs[color]['moreBackground']}">扫描二维码了解更多</span>
+          <span contenteditable="plaintext-only" class="input-span" v-text="QRcodeSelect.message" @blur="setValue2(QRcodeSelect,'message', $event.target.innerHTML)" style="font-size: 12px;" :style="{color: colorConfigs[color]['moreBackground']}"></span>
         </div>
         <!-- 居中显示二维码 -->
-        <div class="qrcode" style=" display: grid;place-items: center;">
-          <img v-if="QRcodeSelect.isFlie&&QRcodeSelect.file" style="width: 100px;height: 100px;border-radius: 4px;object-fit: cover;"  :src="QRcodeSelect.file" @click="showQRcodeChange"/>
+        <div class="qrcode">
+          <div v-if="QRcodeSelect.isFlie&&QRcodeSelect.file" >
+            <img v-for="(f,index) in QRcodeSelect.file" :key="index" style="width: 100px;height: 100px;border-radius: 4px;object-fit: cover;"  :src="f" @click="showQRcodeChange"/>
+          </div>
           <a-qrcode v-else  :size="100" errorLevel="H" :value="QRcodeSelect.data" :color="colorConfigs[color]['moreBackground']"  @click="showQRcodeChange" />
         </div>
       </div>
@@ -41,12 +43,12 @@
             :show-upload-list="false"
             class="footer-center"
             style="display: block;"
-              :maxCount="1"
+              :maxCount="2"
               accept="image/*"
               @change="QRcodeFileChange"
               :before-upload="beforeQRcodeUpload"
             >
-              <a-button ref="uploadQRcodeRef">或点此选择码图片(小于2MB)</a-button>
+              <a-button ref="uploadQRcodeRef">或上传图片(小于2MB，最多2张)</a-button>
             </a-upload>
           </a-col>
         </a-row>
@@ -259,11 +261,12 @@ export default {
       colorConfigs:colorConfigs,
       QRcodeSelect:{
         isFlie:false,
-        file:null,
-        data:'https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3'
+        file:[],
+        data:'https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3',
+        message:'扫描二维码了解更多'
       },
       batchInput: {
-        show:false,
+        show:true,
         data:''
       },
       savedTocs:{
@@ -295,6 +298,9 @@ export default {
   },
   created() {
     this.initData()
+    if(this.batchInput.show){
+      this.initBatchInputData()
+    }
   },
   methods: {
     setValue(field, val) {
@@ -378,6 +384,9 @@ export default {
         this.showQRCode = data.showQRCode
         if(data.QRcodeSelect){
           this.QRcodeSelect = data.QRcodeSelect
+          if(typeof data.QRcodeSelect.file === 'string'){
+            this.QRcodeSelect.file = [data.QRcodeSelect.file]
+          }
         }
     },
     getCurrData(){
@@ -412,7 +421,7 @@ export default {
           return
         }
         this.savedTocs.show = false
-        const data = this.getCurrData()
+        const data = JSON.parse(JSON.stringify(this.getCurrData()))
         data['configName'] = this.currConfigTitle
         this.savedTocs.data.push(data)
         this.saveTocsToLocal()
@@ -430,6 +439,7 @@ export default {
     },
     useThisConfig(data){
       this.setDataToCurr(data)
+      this.initBatchInputData()
     },
     deleteThisConfig(index){
       this.savedTocs.data.splice(index,1)
@@ -446,10 +456,18 @@ export default {
       }
       return isLt2M
     },
-    QRcodeFileChange({ file }){
+    QRcodeFileChange({ file,fileList }){
+      console.log(file,fileList)
       if (file.status !== 'uploading') {
         this.getBase64(file.originFileObj, base64Url => {
-          this.QRcodeSelect.file = base64Url
+          if(typeof this.QRcodeSelect.file === 'string'){
+            this.QRcodeSelect.file = [this.QRcodeSelect.file]
+          }
+          // 保留最新的
+          if(this.QRcodeSelect.file&&this.QRcodeSelect.file.length == 2){
+            this.QRcodeSelect.file = this.QRcodeSelect.file.slice(1)
+          }
+          this.QRcodeSelect.file.push(base64Url)
           this.QRcodeSelect.isFlie = true
           this.saveData()
         });
@@ -491,42 +509,6 @@ export default {
 #course-container.toc-small{
   padding: 5px 25px;
 }
-/* #course-container.pink{
-  background-color: #f5e5eb;
-}
-#course-container.green{
-  background-color: #d9f7be;
-}
-#course-container.bule{
-  background-color: #e6f4ff;
-}
-#course-container.morebule{
-  background-color: #0b419a;
-}
-#course-container.red{
-  background-color: #ffccc7;
-}
-#course-container.golden{
-  background-color: #fff1b8;
-}
-#course-container.rmb-100{
-  background-color: #f5abb7;
-}
-#course-container.rmb-50{
-  background-color: #a7d4c3;
-}
-#course-container.rmb-20{
-  background-color: #dba880;
-}
-#course-container.rmb-10{
-  background-color: #94d2ef;
-}
-#course-container.rmb-5{
-  background-color: #d5c0cf;
-}
-#course-container.rmb-1{
-  background-color: #b0ce95;
-} */
 .toc {
   padding: 10px;
   width: 95%;
@@ -543,107 +525,15 @@ export default {
   font-weight: 600;
   position: relative;
 }
-/* #course-container.pink>.title{
-  background-color: #71403f;
-}
-#course-container.green>.title{
-  background-color: #5d864b;
-}
-#course-container.bule>.title{
-  background-color: #5c78a5;
-}
-#course-container.morebule>.title{
-  background-color: #1173ce;
-}
-#course-container.red>.title{
-  background-color: #8f282d;
-}
-#course-container.golden>.title{
-  background-color: #9e7020;
-}
-#course-container.rmb-100>.title{
-  background-color: #cb364a;
-}
-#course-container.rmb-50>.title{
-  background-color: #3d6756;
-}
-#course-container.rmb-20>.title{
-  background-color: #8d4b45;
-}
-#course-container.rmb-10>.title{
-  background-color: #355386;
-}
-#course-container.rmb-5>.title{
-  background-color: #2d1c4d;
-}
-#course-container.rmb-1>.title{
-  background-color: #4d584c;
-} */
 
 .item{
   background-color:#ffffff;
   margin-bottom: 5px;
 }
-/* 
-#course-container.pink>.item{
-  color: #412A2D;
-}
-#course-container.green>.item{
-  color: #48633c;
-}
-#course-container.bule>.item{
-  color: #40516d;
-}
-#course-container.morebule>.item{
-  color: #1f3336;
-}
-#course-container.red>.item{
-  color: #5a1a1d;
-}
-#course-container.golden>.item{
-  color: #664815;
-}
-#course-container.rmb-100>.item{
-  color: #be0f2d;
-}
-#course-container.rmb-50>.item{
-  color: #3d6756;
-}
-#course-container.rmb-20>.item{
-  color: #8d4b45;
-}
-#course-container.rmb-10>.item{
-  color: #355386;
-}
-#course-container.rmb-5>.item{
-  color: #2d1c4d;
-}
-#course-container.rmb-1>.item{
-  color: #4d584c;
-} */
 
 .item>span.index{
   margin-right: 10px;
 }
-/* 
-#course-container.pink>.item>span.index{
-  color: #963e5b !important;
-}
-#course-container.green>.item>span.index{
-  color: #2c6912 !important;
-}
-#course-container.bule>.item>span.index{
-  color: #1349a0 !important;
-}
-#course-container.morebule>.item>span.index{
-  color: #0b419a !important;
-}
-#course-container.red>.item>span.index{
-  color: #8d050c !important;
-}
-#course-container.golden>.item>span.index{
-  color: #ac7414 !important;
-} */
 
 .more{
   color: #ffffff;
@@ -653,43 +543,6 @@ export default {
   margin-top: 10px;
   position: relative;
 }
-/* #course-container.pink>.more{
-  background-color: #c48080;
-}
-#course-container.green>.more{
-  background-color: #8cc972;
-}
-#course-container.bule>.more{
-  background-color: #8eb0e5;
-}
-#course-container.morebule>.more{
-  background-color: #82a7e2;
-}
-#course-container.red>.more{
-  background-color: #db787d;
-}
-#course-container.golden>.more{
-  background-color: #f1c475;
-  color: #664815;
-}
-#course-container.rmb-100>.more{
-  background-color: #d55f6f;
-}
-#course-container.rmb-50>.more{
-  background-color: #509a80;
-}
-#course-container.rmb-20>.more{
-  background-color: #a05d46;
-}
-#course-container.rmb-10>.more{
-  background-color: #5091c0;
-}
-#course-container.rmb-5>.more{
-  background-color: #684e94;
-}
-#course-container.rmb-1>.more{
-  background-color: #6a855b;
-} */
 span.left-line{
    position: absolute;
     height: 40%;
@@ -762,5 +615,18 @@ span.right-bg{
 }
 #options{
   background-color: #e1d0d042;
+}
+.qrcode{
+  display: grid;
+  place-items: center;
+}
+.qrcode img{
+  margin: 0px 25px;
+}
+
+@media (min-width: 768px) {
+  #options{
+    
+  }
 }
 </style>
