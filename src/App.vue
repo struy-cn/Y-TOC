@@ -532,7 +532,9 @@ export default {
 }
 
 .item>span.index{
-  margin-right: 10px;
+  /* margin-right: 10px; */
+  display: inline-block;
+  width: 28px
 }
 
 .more{
