@@ -1,6 +1,6 @@
 {
-  "name": "class_toc_gen",
-  "version": "0.0.0",
+  "name": "ytoc",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "vite --host",
