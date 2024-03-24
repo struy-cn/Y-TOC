@@ -7,16 +7,23 @@
     </div>
     <div id="course-container" :class="`${color} ${tocSmallWidth?'toc-small':''}`" :style="{backgroundColor: colorConfigs[color]['background']}" v-else>
       <div class="toc title" :style="{backgroundColor: colorConfigs[color]['titleBackground']}" >
-        <div class="input-span" contenteditable v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div>
+        <div class="input-span" contenteditable="plaintext-only" v-text="courseTitle" @blur="setValue('courseTitle', $event.target.innerHTML)"></div>
         <span class="left-bg"></span><span class="right-bg"></span> <span class="left-line"></span><span class="right-line"></span>
       </div>
-      <div class="toc item" v-for="(item, index) in items" :key="index">
-        <span class="index" :style="{color: colorConfigs[color]['tocIndexColor']}">{{ startNumber(index) }}</span>
-        <span :style="{color: colorConfigs[color]['tocTitleColor']}" class="input-span" contenteditable v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
-      </div>
+      <template v-for="(item, index) in items" :key="index">
+        <div class="toc item" v-if="!item.rootNode" >
+            <span class="index" :style="{color: colorConfigs[color]['tocIndexColor']}" @dblclick="() =>{item.rootNode = !item.rootNode}">{{ startNumber(index) }}</span>
+            <span :style="{color: colorConfigs[color]['tocTitleColor']}" class="input-span" contenteditable="plaintext-only" v-text="item.text" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
+        </div>
+        <template v-else>
+          <div class="toc root-title" :style="{backgroundColor: colorConfigs[color]['moreBackground']}" >
+            <span class="input-span"  contenteditable="plaintext-only" v-text="item.text" @dblclick="() =>{item.rootNode = !item.rootNode}" @blur="setValue2(item,'text', $event.target.innerHTML)"></span>
+          </div>
+        </template>
+      </template>
       <div class="toc more" :style="{backgroundColor: colorConfigs[color]['moreBackground']}">
-        <span contenteditable class="input-span">......</span><br>
-        <div class="input-span" contenteditable v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div>
+        <span contenteditable="plaintext-only" class="input-span">......</span><br>
+        <div class="input-span" contenteditable="plaintext-only" v-text="courseMore" @blur="setValue('courseMore', $event.target.innerHTML)"></div>
         <span class="left-bg"></span><span class="right-bg"></span><span class="left-line"></span><span class="right-line"></span>
       </div>
       <div style="margin-bottom: 10px;" v-if="showQRCode">
@@ -33,21 +40,9 @@
     </div>
     <div id="options">
       <div v-if="!image">
-        <a-row v-if="showQRCode">
-          <a-col :span="24">
-            <p class="footer-center">将以下链接转换为二维码</p>
-            <a-input class="footer-center" placeholder="输入链接更新二维码" v-model:value="QRcodeSelect.data" @change="() => {QRcodeSelect.isFlie = false;saveData()}"></a-input>
-            <a-upload
-            :show-upload-list="false"
-            class="footer-center"
-            style="display: block;"
-              :maxCount="1"
-              accept="image/*"
-              @change="QRcodeFileChange"
-              :before-upload="beforeQRcodeUpload"
-            >
-              <a-button ref="uploadQRcodeRef">或点此选择码图片(小于2MB)</a-button>
-            </a-upload>
+        <a-row>
+          <a-col :span="24" style="text-align: center;">
+            <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
           </a-col>
         </a-row>
         <a-row>
@@ -78,23 +73,38 @@
           </a-col>
         </a-row>
         <p v-if="!batchInput.show" style="text-align: center;">点击内容进行编辑，选择主题，生成图片</p>
+        <a-row>
+          <a-col :span="24" style="text-align: center;">
+            <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号00</a-checkbox>
+            <a-checkbox  v-model:checked="newNumberEveryRoot" @change="saveData" >章节分开计数</a-checkbox>
+            <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >窄目录</a-checkbox>
+            <a-checkbox  v-model:checked="showQRCode" @change="saveData" >二维码</a-checkbox>
+          </a-col>
+        </a-row>
+        <a-divider>主题</a-divider> 
         <div class="footer-center">
           <a-radio-group style="width: 100%;" v-model:value="color" @change="saveData">
             <a-radio-button v-for="(value, key) in colorConfigs" :key="key" :style="{backgroundColor: value.background,color:key === 'morebule'?'#fff':''}" :value="key">{{ value.name }}</a-radio-button>
           </a-radio-group>
         </div>
-        <a-row>
-          <a-col :span="24" style="text-align: center;">
-            <a-checkbox  v-model:checked="startNumberZero" @change="saveData" >序号从0开始</a-checkbox>
-            <a-checkbox  v-model:checked="tocSmallWidth" @change="saveData" >目录窄一点</a-checkbox>
-            <a-checkbox  v-model:checked="showQRCode" @change="saveData" >底部二维码</a-checkbox>
+        <a-row v-if="showQRCode">
+          <a-divider>二维码链接</a-divider> 
+          <a-col :span="24">
+            <a-input class="footer-center" placeholder="输入链接更新二维码" v-model:value="QRcodeSelect.data" @change="() => {QRcodeSelect.isFlie = false;saveData()}"></a-input>
+            <a-upload
+            :show-upload-list="false"
+            class="footer-center"
+            style="display: block;"
+              :maxCount="1"
+              accept="image/*"
+              @change="QRcodeFileChange"
+              :before-upload="beforeQRcodeUpload"
+            >
+              <a-button style="width: 100%;" ref="uploadQRcodeRef">或直接选择图片</a-button>
+            </a-upload>
           </a-col>
         </a-row>
-        <a-row>
-          <a-col :span="24" style="text-align: center;">
-            <a-button class="footer-center"  @click="shareImage">图片预览</a-button>
-          </a-col>
-        </a-row>
+        <a-divider>其他</a-divider> 
         <a-row>
           <a-col :span="12" style="text-align: center;">
             <a-button class="footer-center"  @click="openSaveAs">另存当前配置到本地</a-button>
@@ -143,7 +153,7 @@
       </template>
     </div>
   <div class="footer">
-    <p><a href="https://struy.cn/">StruggleYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">打赏作者￥</a>｜<a href="https://github.com/struy-cn/Y-TOC">Github</a></p>
+    <p><a href="https://struy.cn/">AwesomeYang</a>© 2023｜<a href="https://note.mowen.cn/note-intro/?noteUuid=VCM-EtZ94BrA5o4TBc1R3">背后的故事￥</a>｜<a href="https://github.com/struy-cn/Y-TOC">Github</a></p>
   </div>
   </div>
 </template>
@@ -275,6 +285,7 @@ export default {
       courseTitle: '目录总览',  // 课程标题
       courseMore: '持续更新',  // 课程更多内容
       items: [
+        { text: '第一部分' , rootNode: true},
         { text: '童年：被遗弃与选择' },
         { text: '奇特的一对：两个史蒂夫' },
         { text: '出离：觉悟，修行...' },
@@ -284,11 +295,13 @@ export default {
         { text: '克里斯安和莉萨：被遗弃者...' },
         { text: '施乐和莉莎：图形用户界面' },
         { text: '上市：名利双收' },
-        { text: 'Mac 诞生了：你说你想要一场革命' }
+        { text: 'Mac 诞生了：你说你想要一场革命' },
+        { text: '第二部分' , rootNode: true}
       ],  // 目录项列表
       image: '',  // 生成的图像
       color: 'pink',
       startNumberZero: false,
+      newNumberEveryRoot: true,
       tocSmallWidth: false,
       showQRCode: false
     };
@@ -354,7 +367,21 @@ export default {
       this.saveData()
     },
     startNumber(index){
-      const nIndex = this.startNumberZero?index:index + 1
+      // 如果前面有 root-title，并且 newNumberEveryRoot 为 true，每个 root-title 之后的序号都从头计数
+      let nIndex = index
+      if (this.newNumberEveryRoot) { 
+        const lastRootIndex  = this.items.slice(0,index).reduce((acc, element, index) => {
+          if (element.rootNode) {
+              return index; 
+          }
+          return acc; 
+        }, -1)
+        nIndex = (this.startNumberZero?index - lastRootIndex-1:index - lastRootIndex)
+      } else {
+        // 计算当前索引前面的 root-title，减去才是真实序号
+        const afterRootNum = this.items.slice(0,index).filter(x => x.rootNode).length
+        nIndex = (this.startNumberZero?index:index + 1) - afterRootNum
+      }
       return nIndex >9?nIndex:'0' + nIndex
     },
     initData(){
@@ -491,42 +518,6 @@ export default {
 #course-container.toc-small{
   padding: 5px 25px;
 }
-/* #course-container.pink{
-  background-color: #f5e5eb;
-}
-#course-container.green{
-  background-color: #d9f7be;
-}
-#course-container.bule{
-  background-color: #e6f4ff;
-}
-#course-container.morebule{
-  background-color: #0b419a;
-}
-#course-container.red{
-  background-color: #ffccc7;
-}
-#course-container.golden{
-  background-color: #fff1b8;
-}
-#course-container.rmb-100{
-  background-color: #f5abb7;
-}
-#course-container.rmb-50{
-  background-color: #a7d4c3;
-}
-#course-container.rmb-20{
-  background-color: #dba880;
-}
-#course-container.rmb-10{
-  background-color: #94d2ef;
-}
-#course-container.rmb-5{
-  background-color: #d5c0cf;
-}
-#course-container.rmb-1{
-  background-color: #b0ce95;
-} */
 .toc {
   padding: 10px;
   width: 95%;
@@ -543,107 +534,21 @@ export default {
   font-weight: 600;
   position: relative;
 }
-/* #course-container.pink>.title{
-  background-color: #71403f;
+
+.root-title {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 5px;
 }
-#course-container.green>.title{
-  background-color: #5d864b;
-}
-#course-container.bule>.title{
-  background-color: #5c78a5;
-}
-#course-container.morebule>.title{
-  background-color: #1173ce;
-}
-#course-container.red>.title{
-  background-color: #8f282d;
-}
-#course-container.golden>.title{
-  background-color: #9e7020;
-}
-#course-container.rmb-100>.title{
-  background-color: #cb364a;
-}
-#course-container.rmb-50>.title{
-  background-color: #3d6756;
-}
-#course-container.rmb-20>.title{
-  background-color: #8d4b45;
-}
-#course-container.rmb-10>.title{
-  background-color: #355386;
-}
-#course-container.rmb-5>.title{
-  background-color: #2d1c4d;
-}
-#course-container.rmb-1>.title{
-  background-color: #4d584c;
-} */
 
 .item{
   background-color:#ffffff;
   margin-bottom: 5px;
 }
-/* 
-#course-container.pink>.item{
-  color: #412A2D;
-}
-#course-container.green>.item{
-  color: #48633c;
-}
-#course-container.bule>.item{
-  color: #40516d;
-}
-#course-container.morebule>.item{
-  color: #1f3336;
-}
-#course-container.red>.item{
-  color: #5a1a1d;
-}
-#course-container.golden>.item{
-  color: #664815;
-}
-#course-container.rmb-100>.item{
-  color: #be0f2d;
-}
-#course-container.rmb-50>.item{
-  color: #3d6756;
-}
-#course-container.rmb-20>.item{
-  color: #8d4b45;
-}
-#course-container.rmb-10>.item{
-  color: #355386;
-}
-#course-container.rmb-5>.item{
-  color: #2d1c4d;
-}
-#course-container.rmb-1>.item{
-  color: #4d584c;
-} */
 
 .item>span.index{
   margin-right: 10px;
 }
-/* 
-#course-container.pink>.item>span.index{
-  color: #963e5b !important;
-}
-#course-container.green>.item>span.index{
-  color: #2c6912 !important;
-}
-#course-container.bule>.item>span.index{
-  color: #1349a0 !important;
-}
-#course-container.morebule>.item>span.index{
-  color: #0b419a !important;
-}
-#course-container.red>.item>span.index{
-  color: #8d050c !important;
-}
-#course-container.golden>.item>span.index{
-  color: #ac7414 !important;
-} */
 
 .more{
   color: #ffffff;
@@ -653,43 +558,6 @@ export default {
   margin-top: 10px;
   position: relative;
 }
-/* #course-container.pink>.more{
-  background-color: #c48080;
-}
-#course-container.green>.more{
-  background-color: #8cc972;
-}
-#course-container.bule>.more{
-  background-color: #8eb0e5;
-}
-#course-container.morebule>.more{
-  background-color: #82a7e2;
-}
-#course-container.red>.more{
-  background-color: #db787d;
-}
-#course-container.golden>.more{
-  background-color: #f1c475;
-  color: #664815;
-}
-#course-container.rmb-100>.more{
-  background-color: #d55f6f;
-}
-#course-container.rmb-50>.more{
-  background-color: #509a80;
-}
-#course-container.rmb-20>.more{
-  background-color: #a05d46;
-}
-#course-container.rmb-10>.more{
-  background-color: #5091c0;
-}
-#course-container.rmb-5>.more{
-  background-color: #684e94;
-}
-#course-container.rmb-1>.more{
-  background-color: #6a855b;
-} */
 span.left-line{
    position: absolute;
     height: 40%;
